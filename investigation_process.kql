@@ -1,0 +1,37 @@
+// Check for powershell and b64 encoded command
+DeviceProcessEvents
+// Define timeframe
+| where Timestamp > ago(1d)
+| where FileName has_any (@"powershell.exe", @"pwsh.exe", @"powershell_ise.exe")
+| where ProcessCommandLine contains "base64"
+| summarize arg_max(Timestamp, *) by DeviceName
+
+
+// correlate user login activity from IP, countries & ISP
+IdentityLogonEvents
+| where AccountObjectId == "add_object_ID" // get object ID from defender user page
+| project Timestamp, DeviceType, OSPlatform, Application, ActionType, IPAddress, Location, ISP
+| order by Timestamp
+
+
+// Search for malicious links where user was allowed to proceed through. 
+UrlClickEvents
+| where ActionType == "ClickAllowed" or IsClickedThrough !="0"
+| where ThreatTypes has "Phish"
+| summarize by ReportId, IsClickedThrough, AccountUpn, NetworkMessageId, ThreatTypes, Timestamp
+
+
+// For email clicks, join URLClickEvents with EmailEvents and EmailPostDeliveryEvents based on NetworkMessageId to determine clickthroughs, potential deliveries through User/Tenant overrides and detection details
+UrlClickEvents
+| where ThreatTypes has "Phish"
+| join EmailEvents on NetworkMessageId,  $left.AccountUpn == $right.RecipientEmailAddress
+| project Timestamp, Url, ActionType, AccountUpn, ReportId, NetworkMessageId, ThreatTypes, IsClickedThrough, DeliveryLocation, OrgLevelAction, UserLevelAction
+
+
+         .::                                  .::  
+         .::             .::     .:           .::  
+ .:::: .:.: .:.: .:::  . .::       .:: .::  .:.: .:
+.::      .::   .::    .: .::    .:: .::  .::  .::  
+  .:::   .::   .::  .::  .::    .:: .::  .::  .::  
+    .::  .::   .:: .:::: .: .:: .:: .::  .::  .::  
+.:: .::   .:: .:::       .::    .::.:::  .::   .:: 
