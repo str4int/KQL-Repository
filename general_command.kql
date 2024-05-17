@@ -1,0 +1,43 @@
+// Statistics onboarded devices (OS)
+DeviceInfo
+| where OnboardingStatus == "Onboarded"
+| summarize arg_max(Timestamp, *) by DeviceId
+| summarize TotalDevices = count() by OSPlatform
+
+
+// Total Events by Table - last 30 days
+union *
+| where Timestamp > startofday(ago(30d))
+| summarize TotalEvents = count() by Type
+| sort by TotalEvents asc
+
+
+//---------------------
+//      VIZUALIZE
+//---------------------
+
+//Visualize the daily incident triggers
+AlertInfo
+| where Timestamp > ago(30d)
+// Collect the first entry of each alert
+| summarize arg_min(Timestamp, *) by AlertId
+| summarize Total = count() by bin(Timestamp, 1d)
+| render columnchart with(title="Incident triggers last 30 days")
+
+
+let TimeRange = 10d;
+search *
+| where Timestamp > ago(TimeRange)
+| project Timestamp, $table
+| summarize Events = count() by $table, bin(Timestamp, 1d)
+| render linechart  with (title="Total Daily Events") 
+
+
+
+         .::                                  .::  
+         .::             .::     .:           .::  
+ .:::: .:.: .:.: .:::  . .::       .:: .::  .:.: .:
+.::      .::   .::    .: .::    .:: .::  .::  .::  
+  .:::   .::   .::  .::  .::    .:: .::  .::  .::  
+    .::  .::   .:: .:::: .: .:: .:: .::  .::  .::  
+.:: .::   .:: .:::       .::    .::.:::  .::   .:: 
