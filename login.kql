@@ -1,0 +1,6 @@
+// Failed Login attempts check
+SecurityEvent
+| where TimeGenerated >= ago(1d)
+| where EventID == 4625
+| summarize FailedLogins=count() by Account
+| sort by FailedLogins desc
