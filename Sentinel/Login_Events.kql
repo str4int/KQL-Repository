@@ -4,3 +4,21 @@ SecurityEvent
 | where EventID == 4625
 | summarize FailedLogins=count() by Account
 | sort by FailedLogins desc
+
+
+// show all successful logins in the Azure portal
+SigninLogs
+| where AppDisplayName == "Azure Portal" and ResultType == 0
+
+
+// show all newly created users
+AuditLogs
+| where OperationName == "Add user"
+| extend userCreated = tostring(TargetResources.[0].["userPrincipalName"])
+| extend createbBy = tostring(InitiatedBy.["user"].["userPrincipalName"])
+| project TimeGenerated, userCreated, createbBy, Result
+
+
+// Get all login events that are not produced by NT Authority\System
+SecurityEvent
+| where EventID == "4624" and Account <> "NT AUTHORITY\\SYSTEM"
