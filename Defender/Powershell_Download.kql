@@ -1,0 +1,41 @@
+// Find Windows PowerShell execution events that could involve a download.
+DeviceProcessEvents
+| where FileName in~ ("powershell.exe", "powershell_ise.exe")
+| where ProcessCommandLine has "Net.WebClient"
+or ProcessCommandLine has "DownloadFile"
+or ProcessCommandLine has "Invoke-WebRequest"
+or ProcessCommandLine has "Invoke-Shellcode"
+or ProcessCommandLine has "http"
+or ProcessCommandLine has "IEX"
+or ProcessCommandLine has "Start-BitsTransfer"
+or ProcessCommandLine has "mpcmdrun.exe"
+| project Timestamp, DeviceName, InitiatingProcessFileName, FileName, ProcessCommandLine
+
+
+// Find PowerShell execution events that could involve a download II
+union DeviceProcessEvents, DeviceNetworkEvents
+| where Timestamp > ago(7d)
+| where FileName in~ ("powershell.exe", "powershell_ise.exe")
+| where ProcessCommandLine has_any ("WebClient",
+"DownloadFile",
+"DownloadData",
+"DownloadString",
+"WebRequest",
+"Shellcode",
+"http",
+"https")
+| project Timestamp, DeviceName, InitiatingProcessFileName,InitiatingProcessCommandLine, FileName, ProcessCommandLine, RemoteIP, RemoteUrl, RemotePort
+| top 100 by Timestamp
+
+
+// Finds all PowerShell execution events wherein the PowerShell window has been explicitly hidden.
+DeviceProcessEvents
+| where Timestamp > ago(7d)
+| where InitiatingProcessFileName =~ "powershell.exe"
+| where InitiatingProcessCommandLine has "-Command"
+| where InitiatingProcessCommandLine has "-w hidden" or InitiatingProcessCommandLine has "-windowstyle hidden"
+| project Timestamp, DeviceName, InitiatingProcessCommandLine
+| top 100 by Timestamp
+
+
+
