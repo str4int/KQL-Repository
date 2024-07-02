@@ -1,2 +1,2 @@
 # KQL
-KQL to help our daily tasks
+KQL to help our daily SOC operation
