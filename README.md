@@ -1,6 +1,6 @@
 # KQL
 KQL to help our daily SOC operation
-
+'''
 
          .::                                  .::  
          .::             .::     .:           .::  
@@ -9,3 +9,4 @@ KQL to help our daily SOC operation
   .:::   .::   .::  .::  .::    .:: .::  .::  .::  
     .::  .::   .:: .:::: .: .:: .:: .::  .::  .::  
 .:: .::   .:: .:::       .::    .::.:::  .::   .:: 
+'''
