@@ -28,6 +28,17 @@ UrlClickEvents
 | project Timestamp, Url, ActionType, AccountUpn, ReportId, NetworkMessageId, ThreatTypes, IsClickedThrough, DeliveryLocation, OrgLevelAction, UserLevelAction
 
 
+// URL prevented by Attack surface reduction rules - incident ID 
+let url = "AddHereYourURL";
+search in (EmailUrlInfo,UrlClickEvents,DeviceNetworkEvents,DeviceFileEvents,DeviceEvents,BehaviorEntities)
+Timestamp between (ago(30d) .. now())
+and (RemoteUrl has url
+or FileOriginUrl has url
+or FileOriginReferrerUrl has url
+or Url has url
+)
+
+
          .::                                  .::  
          .::             .::     .:           .::  
  .:::: .:.: .:.: .:::  . .::       .:: .::  .:.: .:
