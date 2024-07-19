@@ -18,3 +18,9 @@ DeviceEvents
 | where ActionType contains "ExploitGuardNetworkProtection"
 | extend ParsedFields=parse_json(AdditionalFields)
 | project DeviceName, ActionType, Timestamp, RemoteUrl, InitiatingProcessFileName, IsAudit=tostring(ParsedFields.IsAudit), ResponseCategory=tostring(ParsedFields.ResponseCategory), DisplayName=tostring(ParsedFields.DisplayName)
+
+
+DeviceEvents
+| where Timestamp >= ago(1d)
+| where ActionType ==  "ExploitGuardNetworkProtectionBlocked"
+| project Timestamp, DeviceName, InitiatingProcessAccountName, RemoteUrl, RemoteIP,  InitiatingProcessFileName, InitiatingProcessId
