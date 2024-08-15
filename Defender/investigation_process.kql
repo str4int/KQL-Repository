@@ -38,6 +38,12 @@ or FileOriginReferrerUrl has url
 or Url has url
 )
 
+// confirm network connection to specific doamin by chonological order
+DeviceNetworkEvents
+| where RemoteUrl contains "myFirstDomain.com" or RemoteUrl contains "mySecondDomain.com"
+| project Timestamp, DeviceName, ActionType, RemoteIP, RemoteUrl, InitiatingProcessAccountName
+| sort by Timestamp asc 
+
 
          .::                                  .::  
          .::             .::     .:           .::  
