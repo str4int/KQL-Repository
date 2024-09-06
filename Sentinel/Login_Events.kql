@@ -19,6 +19,15 @@ AuditLogs
 | project TimeGenerated, userCreated, createbBy, Result
 
 
+// show all added and remove accounts
+AuditLogs
+| where TimeGenerated >= ago(48h)
+| where OperationName contains "Add user" or OperationName contains "delete user"
+| extend targetID = tostring(TargetResources.[0].["userPrincipalName"])
+| extend byWho = tostring(InitiatedBy.["user"].["userPrincipalName"])
+| project TimeGenerated, targetID, OperationName, Result, byWho
+
+
 // Get all login events that are not produced by NT Authority\System
 SecurityEvent
 | where EventID == "4624" and Account <> "NT AUTHORITY\\SYSTEM"
