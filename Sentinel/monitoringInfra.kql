@@ -1,0 +1,8 @@
+// Get azure monito agent
+Heartbeat
+//| where OSType == 'Linux'
+| where Category == 'Azure Monitor Agent'
+| summarize arg_max(TimeGenerated, *) by SourceComputerId
+| sort by Computer
+| render table
+
