@@ -1,0 +1,19 @@
+//-----  IMPOSSIBLE TRAVEL CHECK -------//
+// when impossible travel is trigered
+// 1 - get  AccountObjectId from MS EntraID
+// 2 - add triggered IP and run
+//v.3.1
+let ip1 = "*destectedIP*";
+let ip2 = "*destectedIP*";
+let ip3 = "*destectedIP*";
+let ip4 = "*destectedIP*";
+let checkUserID = "userObjecIDfromEntraID";
+AADSignInEventsBeta
+| where Timestamp >= ago(3d)
+| where AccountObjectId == checkUserID// directly with the usre object id
+//| where AadDeviceId != "deviceObjectID" // ALTERNATIVE - check for "device objectID" on EntraID user page
+| where IPAddress == ip1 or IPAddress == ip2  //or IPAddress == ip3 // or IPAddress == ip4 // correlate IP involved into the impossibe travel - remove comment to add IPs
+//| where OSPlatform contains "os"
+| project Timestamp, AccountDisplayName, DeviceName, Application, IPAddress, City, Country, OSPlatform, LastPasswordChangeTimestamp, AuthenticationRequirement, ClientAppUsed
+| sort by Timestamp desc
+| summarize Total = count() by DeviceName, IPAddress, Country, AccountDisplayName, OSPlatform, Application
