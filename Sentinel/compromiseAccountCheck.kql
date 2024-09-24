@@ -1,0 +1,9 @@
+// will check for confirmation of compromise account
+AuditLogs
+| where OperationName contains "ConfirmAccountCompromised"
+| extend who= InitiatedBy.["user"].["userPrincipalName"]
+| extend impactedUser= TargetResources.[0].["userPrincipalName"]
+| extend object_ID = TargetResources.[0].["id"]
+| project TimeGenerated, impactedUser, object_ID ,OperationName, Result ,who
+
+  
