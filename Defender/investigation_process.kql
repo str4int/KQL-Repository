@@ -45,6 +45,16 @@ DeviceNetworkEvents
 | sort by Timestamp asc 
 
 
+//USB connected check
+DeviceEvents
+| where DeviceName contains "deviceName1" or DeviceName contains "deviceName2"
+|extend details = todynamic(AdditionalFields)
+|mv-expand usb= details.IsOnRemovableMedia
+| where tostring(usb) contains "true"
+| summarize by Timestamp, FileName, FolderPath, DeviceName
+| sort by Timestamp asc 
+
+
          .::                                  .::  
          .::             .::     .:           .::  
  .:::: .:.: .:.: .:::  . .::       .:: .::  .:.: .:
