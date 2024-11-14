@@ -1,0 +1,8 @@
+// check if a MFA token is registred for multiple users
+AuditLogs
+//| search '"DeviceName":"myDeviceName"' // search by device name
+| where TimeGenerated >= ago(10d)
+| search "addMFA_token_from_audit_logs_from_user"
+| where OperationName contains "update"
+| extend targ = tostring(TargetResources.[0].["userPrincipalName"])
+| project TimeGenerated, targ, OperationName
