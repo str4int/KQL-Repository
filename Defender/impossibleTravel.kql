@@ -17,3 +17,34 @@ AADSignInEventsBeta
 | project Timestamp, AccountDisplayName, DeviceName, Application, IPAddress, City, Country, OSPlatform, LastPasswordChangeTimestamp, AuthenticationRequirement, ClientAppUsed
 | sort by Timestamp desc
 | summarize Total = count() by DeviceName, IPAddress, Country, AccountDisplayName, OSPlatform, Application
+
+
+// Impossible travel Check 2
+// Part 1 - get IPs and check if came from registred data or not
+let timeCheck = 24h;
+let InvolvedUser = "mailAdressFromUser"; // add full email address
+let suspiciousIPs = 
+IdentityLogonEvents
+| where Timestamp >= ago(timeCheck)
+| where ActionType == "LogonSuccess"
+| where AccountUpn == InvolvedUser // also possible with objectID = //| where AccountObjectId == InvolvedUser
+| project IPAddress;
+// Part 2 : check IPs into AADSignInEventsBeta and check if connection came from non registred devices
+AADSignInEventsBeta
+| where Timestamp >= ago(timeCheck)
+| where AccountUpn == InvolvedUser // also possible with objectID = //| where AccountObjectId == InvolvedUser
+| where isempty(AadDeviceId) or isnull(AadDeviceId) // check if deviceID is empty
+| where IPAddress in (suspiciousIPs) // check IPs
+//| where OSPlatform contains "MacOS" // check by os to finetune search
+| project Timestamp, AccountDisplayName, AccountUpn, DeviceName, AadDeviceId, Application, IPAddress, City, Country, OSPlatform, ClientAppUsed, LastPasswordChangeTimestamp, AuthenticationRequirement, ReportId
+| sort by Timestamp desc
+//| summarize count() by  Country
+
+
+         .::                                  .::  
+         .::             .::     .:           .::  
+ .:::: .:.: .:.: .:::  . .::       .:: .::  .:.: .:
+.::      .::   .::    .: .::    .:: .::  .::  .::  
+  .:::   .::   .::  .::  .::    .:: .::  .::  .::  
+    .::  .::   .:: .:::: .: .:: .:: .::  .::  .::  
+.:: .::   .:: .:::       .::    .::.:::  .::   .:: 
