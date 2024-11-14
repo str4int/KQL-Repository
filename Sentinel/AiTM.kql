@@ -1,5 +1,6 @@
 SigninLogs
 | where AppDisplayName contains "OfficeHome" and IsInteractive
+| where ResultType == 0
 | project Identity, Location, IPAddress
 | summarize IPs= dcount(IPAddress), Locations = make_set(Location) by Identity
 | where isnotempty(Locations[1])
