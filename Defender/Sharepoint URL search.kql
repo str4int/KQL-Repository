@@ -1,0 +1,32 @@
+//---------------------------------------------------------------//
+// check shared URL creation and external usage by specific user //
+//---------------------------------------------------------------//
+let timeCheck = 30d;
+let searchUser = "externalUserAddress";
+let URLSearch = "sharepoint.com/partOfShareLnk";
+CloudAppEvents
+| where Timestamp >= ago(timeCheck)
+| where Application contains "sharepoint" or Application contains "onedrive"
+// SELECT an action beetwen ActivityType or ActionType below AND comment the other one
+| where ActionType == "AddedToSecureLink" // to view WHO shared the link with searchUser
+//| where ActivityType == "Share" // to see if the link was already used by searchUser (SecureLinkUsed)
+| extend rtype = tostring(parse_json(RawEventData).ItemType),
+rcreator = tostring(parse_json(RawEventData).UserId),
+rcontent = tostring(parse_json(RawEventData).ObjectId),
+rSourceFileName = tostring(parse_json(RawEventData).SourceFileName),
+rSourceFileExtension = tostring(parse_json(RawEventData).SourceFileExtension),
+rTarget = tostring(parse_json(RawEventData).TargetUserOrGroupName)
+//| where rcontent contains URLSearch // -> search by URL content
+| where rcreator contains searchUser or rTarget contains searchUser // -> search user or not
+| project Timestamp, AccountDisplayName, Application, ActionType, rtype, rcreator, rTarget, rSourceFileName, rSourceFileExtension, rcontent,IPAddress, CountryCode, City, ActivityType
+| sort by Timestamp asc 
+
+
+
+         .::                                  .::  
+         .::             .::     .:           .::  
+ .:::: .:.: .:.: .:::  . .::       .:: .::  .:.: .:
+.::      .::   .::    .: .::    .:: .::  .::  .::  
+  .:::   .::   .::  .::  .::    .:: .::  .::  .::  
+    .::  .::   .:: .:::: .: .:: .:: .::  .::  .::  
+.:: .::   .:: .:::       .::    .::.:::  .::   .:: 
