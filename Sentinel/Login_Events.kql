@@ -31,3 +31,21 @@ AuditLogs
 // Get all login events that are not produced by NT Authority\System
 SecurityEvent
 | where EventID == "4624" and Account <> "NT AUTHORITY\\SYSTEM"
+
+
+// Detect interactive failure signin attempt on multiple or singleFactorAuthentication
+SigninLogs
+| where IsInteractive == true
+| mv-expand details = Status.["additionaDetails"]
+| mv-expand errorCode = Status.["errorCode"]
+//| mv-expand failure = Status.["failureReason"]
+| mv-expand city = LocationDetails.["city"]
+| mv-expand device = DeviceDetail.["displayName"]
+| mv-expand OS = DeviceDetail.["operaatingSystem"]
+| where AuthenticationRequirement == "singleFactorAuthentication"
+| where AppDisplayName != "Microsoft Authentication Broker"
+| where errorCode != 0
+| project TimeGenerated,UserDisplayName, ResultDescription, AuthenticationRequirement, AppDisplayName, device, OS, Location, city, ConditionalAccessStatus
+| sort by TimeGenerated desc
+//| summarize count() by UserDisplayName
+//| sort by count_
