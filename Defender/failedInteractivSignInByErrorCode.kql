@@ -15,3 +15,11 @@ AADSignInEventsBeta
 //| summarize count()by IPAddress, Country
 //| summarize count() by  Country, ErrorCode
 //| sort by count_
+
+
+// general search for signin info on specific account
+AADSignInEventsBeta
+| search "emailAddress"
+| project Timestamp, Application, LogonType, AccountDisplayName, ResourceDisplayName, IPAddress, Country, City
+|sort by Timestamp desc
+//| summarize count()by IPAddress
