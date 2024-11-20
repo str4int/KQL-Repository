@@ -1,0 +1,17 @@
+// Signin check on diffrents error code to detect brute force or password spraying attempts
+// error codes:
+// 50126 - InvalidUserNameOrPassword - Error validating credentials due to invalid username or password.
+// 50057 - UserDisabled - The user account is disabled
+// 50144 - InvalidPasswordExpiredOnPremPassword - User's Active Directory password has expired.
+// ressource: https://learn.microsoft.com/en-us/entra/identity-platform/reference-error-codes
+AADSignInEventsBeta
+//| where Application contains "NotApplicable"
+| where LogonType == '["interactiveUser"]'
+| where ErrorCode !in (0, 90000)
+//| where ErrorCode == 50057 // only login attempts on disabled accounts
+| where AuthenticationRequirement contains "singleFactor"
+| project Timestamp, AccountDisplayName, AccountUpn, Application,LogonType, ErrorCode, IPAddress, Country, City
+| sort by Timestamp desc
+//| summarize count()by IPAddress, Country
+//| summarize count() by  Country, ErrorCode
+//| sort by count_
