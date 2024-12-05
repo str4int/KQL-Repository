@@ -41,6 +41,29 @@ AADSignInEventsBeta
 //| summarize count() by  Country
 
 
+//-----  IMPOSSIBLE TRAVEL CHECK -------//
+// when impossible travel is trigered
+// complete information directly from impossible travel with IPs & email address
+// v.3.2
+// -------------------------------------//
+let useremail = "mailAdressFromUser";
+let times = 5d;
+let ip1 = "*destectedIP*";
+let ip2 = "*destectedIP*";
+let ip3 = "";
+let ip4 = "";
+let checkUserID = toscalar(IdentityInfo
+| where AccountUpn == useremail
+| take 1 | project AccountObjectId);
+AADSignInEventsBeta
+| where Timestamp >= ago(times)
+| where AccountObjectId == checkUserID // directly with the usre object id
+| where IPAddress in (ip1, ip2, ip3, ip4) // correlate IP involved into the impossibe travel
+| project Timestamp, AccountDisplayName, DeviceName, Application, IPAddress, City, Country, OSPlatform, LastPasswordChangeTimestamp, AuthenticationRequirement, ClientAppUsed
+| sort by Timestamp desc
+| summarize Total = count() by DeviceName, IPAddress, Country, AccountDisplayName, OSPlatform, Application
+
+
          .::                                  .::  
          .::             .::     .:           .::  
  .:::: .:.: .:.: .:::  . .::       .:: .::  .:.: .:
