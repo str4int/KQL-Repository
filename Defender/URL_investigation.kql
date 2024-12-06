@@ -1,0 +1,17 @@
+// KQL to help finding diffrence beetween real URL visited by users and automatic URL call by webpage itself
+// PROTOTYPE
+// v0.1
+let targetTime = datetime(2024-12-04T16:56:00z); // add date of suspicious ocmmuncaiton in UTC
+DeviceNetworkEvents
+| where Timestamp >= targetTime - 1m and Timestamp <= targetTime + 1m
+| where DeviceName == "*deviceName*" // add device name to reduce scoop
+| where RemoteUrl != "" // remove empty line
+| extend ExtractedDomain = iif(
+    RemoteUrl startswith "http", // if an URL has a protocol (http/https)
+    tostring(split(RemoteUrl, "/")[2]), 
+    tostring(split(RemoteUrl, "/")[0]) // else keep evrything before first "/"
+)
+| where ExtractedDomain !has "." or strlen(ExtractedDomain) - strlen(replace_string(ExtractedDomain, ".", "")) == 1
+or strlen(ExtractedDomain) - strlen(replace_string(ExtractedDomain, ".", "")) == 2 and ExtractedDomain  matches regex @"\.(com|org)\.[a-zA-Z]{2}$" // exclude coutry that use multiple extension
+| project Timestamp, RemoteUrl, RemoteIP, RemotePort, ActionType, InitiatingProcessFileName
+| sort by Timestamp asc
