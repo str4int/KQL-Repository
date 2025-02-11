@@ -49,3 +49,14 @@ SigninLogs
 | sort by TimeGenerated desc
 //| summarize count() by UserDisplayName
 //| sort by count_
+
+
+// check external invitation
+AuditLogs
+| where TimeGenerated >= ago(60d)
+| where OperationName == "Invite external user"
+| extend GuestUPN = tolower(tostring(TargetResources[0].userPrincipalName))
+| extend createdBy = tostring(InitiatedBy.["user"].["userPrincipalName"])
+| extend originalMail = tostring(AdditionalDetails[5].value)
+| where GuestUPN contains "****" //change user name to check
+| project TimeGenerated, createdBy, OperationName, GuestUPN, originalMail
