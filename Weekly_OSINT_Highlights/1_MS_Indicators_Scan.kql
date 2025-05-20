@@ -1,5 +1,5 @@
 // Weekly OSINT Indicators Scan - XDR & Sentinel
-// Original KQL & source from SlimKQL
+// Original KQL & source from SlimKQL -  https://github.com/SlimKQL/Hunting-Queries-Detection-Rules.git
 // https://www.linkedin.com/posts/0x534c_cybersecurity-osint-defenderxdr-activity-7297886477198180353-K_0Y/
 
 // ----------------------------------------- //
