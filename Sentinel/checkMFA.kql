@@ -6,3 +6,13 @@ AuditLogs
 | where OperationName contains "update"
 | extend targ = tostring(TargetResources.[0].["userPrincipalName"])
 | project TimeGenerated, targ, OperationName
+
+
+// MFA - check and review authentifications methods
+// can be usful to get DeviceToken and coorelate MFA
+AuditLogs
+| where TimeGenerated >= ago(3d)
+| where Identity == "Azure MFA StrongAuthenticationService"
+| extend User = tostring(TargetResources.[0].["userPrincipalName"])
+| extend Properties = tostring(TargetResources.[0].["modifiedProperties"])
+| project TimeGenerated, ActivityDateTime, Identity, Result, User, Properties
