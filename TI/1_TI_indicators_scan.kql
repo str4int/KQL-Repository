@@ -1,5 +1,5 @@
 let TI_Check=externaldata(Type:string, Value:string)
-[h'https://raw.githubusercontent.com/str4int/KQL-Repository/refs/heads/master/Weekly_OSINT_Highlights/TI/SharePoint_z_IOC.csv']; //change for your choosen IOC file
+[h'https://raw.githubusercontent.com/str4int/KQL-Repository/refs/heads/master/TI/SharePoint_z_IOC.csv']; //change for your choosen IOC file
 let TI_HASH =
 TI_Check
 | where Type == "File"
