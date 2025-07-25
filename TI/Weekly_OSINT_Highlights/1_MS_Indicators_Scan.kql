@@ -6,7 +6,7 @@
 
 // SENTINEL
 let WeeklyOSINT=externaldata(Type:string, Value:string, Source:string)
-[h'https://raw.githubusercontent.com/str4int/KQL-Repository/refs/heads/master/Weekly_OSINT_Highlights/2025_05_12.csv']; //change for your choosen IOC date
+[h'https://raw.githubusercontent.com/str4int/KQL-Repository/refs/heads/master/TI/Weekly_OSINT_Highlights/2025_05_12.csv']; //change for your choosen IOC date
 let OSINTSHA256 =
 WeeklyOSINT
 | where Type == "hash_sha256"
