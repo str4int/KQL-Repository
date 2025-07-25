@@ -1,0 +1,44 @@
+let TI_Check=externaldata(Type:string, Value:string)
+[h'https://raw.githubusercontent.com/str4int/KQL-Repository/refs/heads/master/Weekly_OSINT_Highlights/TI/SharePoint_z_IOC.csv']; //change for your choosen IOC file
+let TI_HASH =
+TI_Check
+| where Type == "File"
+| project Value;
+let TI_DOMAIN =
+TI_Check
+| where Type == "DOMAIN"
+| project Value;
+let TI_URL =
+TI_Check
+| where Type == "URL"
+| project Value;
+let TI_IP =
+TI_Check
+| where Type == "IP"
+| project Value;
+let ScanEmailAttachments =
+EmailAttachmentInfo
+| where TimeGenerated > ago(30d)
+| where SHA256 has_any(TI_HASH);
+let ScanEmailURLs =
+EmailUrlInfo
+| where TimeGenerated > ago(30d)
+| where UrlDomain has_any(TI_DOMAIN) or Url has_any(TI_URL);
+let ScanEndpointFiles =
+DeviceFileEvents
+| where TimeGenerated > ago(30d)
+| where ActionType == "FileCreated"
+| where MD5 has_any(TI_HASH) or SHA1 has_any(TI_HASH) or SHA256 has_any(TI_HASH);
+let ScanEndpointNetwork1 =
+DeviceNetworkEvents
+| where TimeGenerated > ago(30d)
+| where ActionType == "ConnectionSuccess"
+| where RemoteIP has_any (TI_IP) or RemoteUrl has_any (TI_DOMAIN);
+let ScanEndpointNetwork2 =
+DeviceNetworkEvents
+| where TimeGenerated > ago(30d)
+| where ActionType == "HttpConnectionInspected"
+| extend ConnectInfo = todynamic(AdditionalFields)
+| extend HttpHost = ConnectInfo.host
+| where HttpHost has_any(TI_DOMAIN);
+union ScanEmailAttachments, ScanEmailURLs, ScanEndpointFiles, ScanEndpointNetwork1, ScanEndpointNetwork2
