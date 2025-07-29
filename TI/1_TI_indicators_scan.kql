@@ -6,7 +6,7 @@ TI_Check
 | project Value;
 let TI_DOMAIN =
 TI_Check
-| where Type == "DOMAIN"
+| where Type == "Domain"
 | project Value;
 let TI_URL =
 TI_Check
