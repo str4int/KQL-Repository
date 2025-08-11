@@ -16,6 +16,10 @@ let TI_IP =
 TI_Check
 | where Type == "IP"
 | project Value;
+let TI_Mail =
+TI_Check
+| where Type == "Email"
+| project Value;
 let ScanEmailAttachments =
 EmailAttachmentInfo
 | where TimeGenerated > ago(30d)
@@ -41,4 +45,8 @@ DeviceNetworkEvents
 | extend ConnectInfo = todynamic(AdditionalFields)
 | extend HttpHost = ConnectInfo.host
 | where HttpHost has_any(TI_DOMAIN);
-union ScanEmailAttachments, ScanEmailURLs, ScanEndpointFiles, ScanEndpointNetwork1, ScanEndpointNetwork2
+let ScanEmailSender =
+EmailEvents
+| where TimeGenerated > ago(30d)
+| where SenderMailFromAddress has_any(TI_Mail) or SenderFromAddress has_any(TI_Mail);
+union ScanEmailAttachments, ScanEmailURLs, ScanEndpointFiles, ScanEndpointNetwork1, ScanEndpointNetwork2, ScanEmailSender
