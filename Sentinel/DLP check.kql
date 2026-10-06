@@ -1,0 +1,34 @@
+// Sort DLP alerts by Severity and Users
+let SeverityOrder = datatable(AlertSeverity:string, SevScore:int)
+[
+    "High", 4,
+    "Medium", 3,
+    "Low", 2,
+    "Informational", 1
+];
+SecurityAlert
+| where TimeGenerated > ago(7d)
+| where ProductName has "Data Loss Prevention"
+| summarize arg_max(TimeGenerated, *) by SystemAlertId
+| mv-expand Entity = todynamic(Entities)
+| where tostring(Entity.Type) =~ "account"
+| extend User = tolower(iif(isnotempty(Entity.UPNSuffix),
+                    strcat(tostring(Entity.Name), "@", tostring(Entity.UPNSuffix)),
+                    tostring(Entity.Name)))
+| where isnotempty(User)
+| distinct SystemAlertId, User, AlertName, AlertSeverity, TimeGenerated
+| lookup kind=leftouter SeverityOrder on AlertSeverity
+| summarize
+    TotalAlertes   = dcount(SystemAlertId),
+    High           = dcountif(SystemAlertId, AlertSeverity == "High"),
+    Medium         = dcountif(SystemAlertId, AlertSeverity == "Medium"),
+    Low            = dcountif(SystemAlertId, AlertSeverity == "Low"),
+    Info           = dcountif(SystemAlertId, AlertSeverity == "Informational"),
+    MaxSevScore    = max(SevScore),
+    Policies       = make_set(AlertName, 20),
+    PremiereAlerte = min(TimeGenerated),
+    DerniereAlerte = max(TimeGenerated)
+    by User
+| extend GraviteMax = case(MaxSevScore == 4, "High", MaxSevScore == 3, "Medium", MaxSevScore == 2, "Low", "Informational")
+| order by MaxSevScore desc, High desc, Medium desc, TotalAlertes desc
+| project-away MaxSevScore
